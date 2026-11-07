@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
 import { TID } from "@/constants/testIds";
 import {
-  getTrending,
-  getTopRated,
+  getTrendingHorror,
+  getTopNightmares,
   getRecent,
   getUpcoming,
   getGenres,
   getPlatforms,
-  getSearch,
+  getFeaturedGames,
 } from "@/services/games";
 import { GameCarousel } from "@/components/GameCarousel";
 import { RatingBadge } from "@/components/RatingBadge";
@@ -16,16 +17,39 @@ import { PlatformBadges } from "@/components/PlatformBadges";
 import { formatYear, stripHtml } from "@/utils/format";
 import { ChevronRight, Flame, Play } from "lucide-react";
 
-const getFeaturedOutlast = async () => {
-  const search = await getSearch({ query: "Outlast 2", page_size: 10 });
-  const game = (search.results || []).find((result) => result.slug === "outlast-2");
-  if (!game) {
-    throw new Error("RAWG search did not return Outlast 2.");
-  }
-  return game;
+const HERO_SLIDE_DURATION = 7000;
+const POPULAR_PLATFORMS = [
+  ["playstation 5"],
+  ["xbox series x s", "xbox series x", "xbox series s"],
+  ["nintendo switch 2", "switch 2"],
+  ["playstation 4", "ps4"],
+  ["playstation 3", "ps3"],
+  ["playstation 2", "ps2"],
+  ["xbox 360"],
+];
+
+const selectPopularPlatforms = (platforms = []) => {
+  const normalize = (value) => String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  return POPULAR_PLATFORMS
+    .map((aliases) => platforms.find((platform) =>
+      aliases.includes(normalize(platform.name)) || aliases.includes(normalize(platform.slug))
+    ))
+    .filter(Boolean);
 };
 
-const Hero = ({ game, error }) => {
+const Hero = ({ games, error }) => {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [timerReset, setTimerReset] = useState(0);
+  const game = games[activeIndex];
+
+  useEffect(() => {
+    if (games.length < 2) return undefined;
+    const timer = setTimeout(() => {
+      setActiveIndex((index) => (index + 1) % games.length);
+    }, HERO_SLIDE_DURATION);
+    return () => clearTimeout(timer);
+  }, [games.length, activeIndex, timerReset]);
+
   if (!game) {
     return error ? (
       <div role="status" className="grid min-h-[90vh] w-full place-items-center text-sm text-[color:var(--nf-text-dim)]">
@@ -38,47 +62,89 @@ const Hero = ({ game, error }) => {
       data-testid={TID.heroBanner}
       className="relative min-h-[90vh] min-h-[90svh] w-full overflow-hidden"
     >
-      <img
-        src={game.background_image}
-        alt={game.name}
-        fetchpriority="high"
-        decoding="async"
-        className="absolute inset-0 h-full w-full object-cover"
-      />
+      <AnimatePresence initial={false} mode="sync">
+        <motion.img
+          key={`hero-image-${game.id}`}
+          src={game.background_image}
+          alt={game.name}
+          fetchpriority="high"
+          decoding="async"
+          initial={{ opacity: 0, scale: 1.025 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.8, ease: "easeInOut" }}
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+      </AnimatePresence>
       <div className="absolute inset-0 nf-hero-fade" />
       <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/45 to-transparent" />
       <div className="nf-fog" />
 
       <div className="relative z-10 max-w-[1440px] mx-auto px-5 sm:px-6 md:px-10 min-h-[90vh] min-h-[90svh] flex flex-col justify-end pb-12 sm:pb-16 md:pb-24">
-        <p className="font-brand nf-overline text-[10px] sm:text-[11px] text-[color:var(--nf-accent)]">
-          <Flame className="inline h-3 w-3 mr-2 -mt-0.5" /> Featured · {game.genres?.map((genre) => genre.name).join(" · ") || "Game"}
-        </p>
-        <h1 className="font-display nf-hero-title text-[clamp(2.75rem,12vw,4rem)] sm:text-6xl md:text-7xl lg:text-[7rem] mt-4 max-w-4xl leading-[0.9] sm:leading-[0.82]">
-          {game.name}
-        </h1>
-        <div className="mt-6 flex flex-wrap items-center gap-3">
-          <RatingBadge value={game.rating} metacritic={game.metacritic} />
-          <PlatformBadges platforms={game.parent_platforms} max={6} />
-          <span className="font-brand text-[11px] tracking-[0.2em] text-[color:var(--nf-text-dim)]">
-            · {formatYear(game.released)}
-          </span>
-          {game.esrb_rating?.name && (
-            <span className="font-brand text-[11px] tracking-[0.15em] text-[color:var(--nf-text-dim)]">
-              · {game.esrb_rating.name}
-            </span>
-          )}
-        </div>
-        <p className="mt-6 max-w-2xl line-clamp-3 text-base md:text-lg text-[color:var(--nf-text-dim)] leading-relaxed">
-          {stripHtml(game.description_raw || "Descend into a curated vault of games - each one a doorway into a new world.")
-            .replace(/#{1,6}\s*/g, "")}
-        </p>
-        <div className="mt-8 flex flex-wrap gap-3">
-          <Link data-testid={TID.heroCta} to={`/game/${game.slug}`} className="nf-btn nf-btn-primary">
-            <Play className="h-3.5 w-3.5" /> View Details
-          </Link>
-          <Link to="/browse" className="nf-btn">
-            Explore Vault <ChevronRight className="h-3.5 w-3.5" />
-          </Link>
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={game.id}
+            initial={{ opacity: 0, x: 28 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -28 }}
+            transition={{ duration: 0.55, ease: [0.25, 0.46, 0.45, 0.94] }}
+          >
+            <p className="font-brand nf-overline text-[10px] sm:text-[11px] text-[color:var(--nf-accent)]">
+              <Flame className="inline h-3 w-3 mr-2 -mt-0.5" /> Featured · {game.genres?.slice(0, 3).map((genre) => genre.name).join(" · ") || "Game"}
+            </p>
+            <h1 className="font-display nf-hero-title text-[clamp(2.75rem,12vw,4rem)] sm:text-6xl md:text-7xl lg:text-[7rem] mt-4 max-w-4xl leading-[0.9] sm:leading-[0.82]">
+              {game.name}
+            </h1>
+            <div className="mt-6 flex flex-wrap items-center gap-3">
+              <RatingBadge
+                value={game.rating}
+                metacritic={game.metacritic}
+                criticRating={game.critic_rating}
+                provider={game.provider}
+              />
+              <PlatformBadges platforms={game.parent_platforms} max={6} />
+              <span className="font-brand text-[11px] tracking-[0.2em] text-[color:var(--nf-text-dim)]">
+                · {formatYear(game.released)}
+              </span>
+              {game.esrb_rating?.name && (
+                <span className="font-brand text-[11px] tracking-[0.15em] text-[color:var(--nf-text-dim)]">
+                  · {game.esrb_rating.name}
+                </span>
+              )}
+            </div>
+            <p className="mt-6 max-w-2xl line-clamp-3 text-base md:text-lg text-[color:var(--nf-text-dim)] leading-relaxed">
+              {stripHtml(game.description_raw || "Descend into a curated vault of games - each one a doorway into a new world.")
+                .replace(/#{1,6}\s*/g, "")}
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link data-testid={TID.heroCta} to={`/game/${game.slug}`} className="nf-btn nf-btn-primary">
+                <Play className="h-3.5 w-3.5" /> View Details
+              </Link>
+              <Link to="/browse" className="nf-btn">
+                Explore Vault <ChevronRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+          </motion.div>
+        </AnimatePresence>
+        <div className="relative z-20 mt-4 flex items-center justify-end gap-1" role="group" aria-label="Featured game slides">
+          {games.map((featured, index) => (
+            <button
+              key={featured.id}
+              type="button"
+              data-testid={`hero-slide-${index}`}
+              aria-label={`Show ${featured.name}`}
+              aria-pressed={activeIndex === index}
+              onClick={() => {
+                setActiveIndex(index);
+                setTimerReset((value) => value + 1);
+              }}
+              className={`h-2 rounded-full transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[color:var(--nf-accent)] ${
+                activeIndex === index
+                  ? "w-8 bg-[color:var(--nf-accent)]"
+                  : "w-2 bg-white/50 hover:bg-white"
+              }`}
+            />
+          ))}
         </div>
       </div>
     </section>
@@ -106,7 +172,7 @@ const GenrePlatformStrip = ({ genres, platforms, errors }) => (
       <div className="mt-6 flex flex-wrap gap-2">
         {errors.platforms ? (
           <p role="status" className="text-sm text-[color:var(--nf-text-dim)]">{errors.platforms}</p>
-        ) : (platforms || []).slice(0, 10).map((p) => (
+        ) : selectPopularPlatforms(platforms).map((p) => (
           <Link key={p.id} to={`/browse?platform=${p.id}`} className="nf-chip">
             {p.name}
           </Link>
@@ -176,7 +242,7 @@ export default function Home() {
   const [upcoming, setUpcoming] = useState([]);
   const [genres, setGenres] = useState([]);
   const [platforms, setPlatforms] = useState([]);
-  const [heroGame, setHeroGame] = useState(null);
+  const [heroGames, setHeroGames] = useState([]);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(true);
 
@@ -185,13 +251,13 @@ export default function Home() {
     (async () => {
       try {
         const results = await Promise.allSettled([
-          getTrending({ page_size: 12 }),
-          getTopRated({ page_size: 12 }),
+          getTrendingHorror(),
+          getTopNightmares(),
           getRecent({ page_size: 12 }),
           getUpcoming({ page_size: 12 }),
           getGenres(),
           getPlatforms(),
-          getFeaturedOutlast(),
+          getFeaturedGames(),
         ]);
         if (!mounted) return;
         const setters = [
@@ -201,7 +267,7 @@ export default function Home() {
           (data) => setUpcoming(data?.results || []),
           (data) => setGenres(data?.results || []),
           (data) => setPlatforms(data?.results || []),
-          setHeroGame,
+          (data) => setHeroGames(data?.results || []),
         ];
         const keys = ["trending", "top", "recent", "upcoming", "genres", "platforms", "hero"];
         results.forEach((result, index) => {
@@ -226,7 +292,7 @@ export default function Home() {
 
   return (
     <div data-testid={TID.home}>
-      <Hero game={heroGame} error={errors.hero} />
+      <Hero games={heroGames} error={errors.hero} />
       <GameCarousel
         title="Trending in the Dark"
         subtitle="Trending Now"

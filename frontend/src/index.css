@@ -341,6 +341,14 @@
 * {
   scrollbar-width: none;
   -ms-overflow-style: none;
+  caret-color: transparent;
+}
+
+input,
+textarea,
+[contenteditable="true"],
+[contenteditable=""] {
+  caret-color: auto;
 }
 
 *::-webkit-scrollbar {

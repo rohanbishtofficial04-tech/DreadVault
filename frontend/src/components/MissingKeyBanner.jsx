@@ -12,7 +12,7 @@ export const MissingKeyBanner = () => {
       <div className="max-w-[1440px] mx-auto flex items-center gap-3 text-xs">
         <AlertTriangle className="h-3.5 w-3.5 text-[color:var(--nf-accent)]" />
         <p className="text-[color:var(--nf-text-dim)] font-brand tracking-[0.16em] uppercase text-[10px]">
-          Demo mode — add REACT_APP_RAWG_API_KEY in <code className="text-[color:var(--nf-text)]">frontend/.env</code> for live data.
+          Demo mode — configure <code className="text-[color:var(--nf-text)]">REACT_APP_BACKEND_URL</code> in <code className="text-[color:var(--nf-text)]">frontend/.env</code> for live data.
         </p>
       </div>
     </div>
