@@ -3,6 +3,12 @@ import { getDetails, getSearch, getBrowse } from "@/services/games";
 import { useDebounce } from "@/hooks/useDebounce";
 import { TID } from "@/constants/testIds";
 import { formatYear } from "@/utils/format";
+import {
+  getBestFit,
+  getContentAdvisories,
+  getMultiplayerDetails,
+  NOT_LISTED,
+} from "@/utils/compare";
 import { RatingBadge } from "@/components/RatingBadge";
 import { Search as SearchIcon, X } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -136,6 +142,11 @@ const playtime = (g) => g?.playtime > 0 ? `${g.playtime} hr${g.playtime === 1 ? 
 const esrbRating = (g) =>
   typeof g?.esrb_rating === "string" ? g.esrb_rating : g?.esrb_rating?.name || "—";
 const names = (items) => items?.map((item) => item.name).filter(Boolean).join(", ") || "—";
+const listedNames = (items) => items?.map((item) => item.name).filter(Boolean).join(", ");
+
+const SectionHeading = ({ children }) => (
+  <h2 className="font-display text-2xl mt-10 mb-2">{children}</h2>
+);
 
 export default function Compare() {
   const [a, setA] = useState(null);
@@ -163,7 +174,8 @@ export default function Compare() {
         <p className="font-brand text-[11px] tracking-[0.2em] text-[color:var(--nf-text-dim)]">Side by Side</p>
         <h1 className="font-display text-5xl md:text-6xl mt-1 tracking-tight">Compare Games</h1>
         <p className="mt-3 text-[color:var(--nf-text-dim)] text-sm max-w-xl">
-          Weigh two horrors against each other. Pick a game for each slot to see the specs stacked.
+          Compare ratings, horror themes, gameplay, content advisories, and co-op support. Missing
+          provider data is marked rather than guessed.
         </p>
       </div>
 
@@ -174,6 +186,7 @@ export default function Compare() {
 
       {(a || b) && (
         <section className="mt-10">
+          <SectionHeading>At a glance</SectionHeading>
           <Row
             label="Title"
             a={a ? <Link to={`/game/${a.slug}`} className="font-display text-xl">{a.name}</Link> : "—"}
@@ -189,6 +202,27 @@ export default function Compare() {
           <Row label="Metacritic" a={a?.metacritic || "—"} b={b?.metacritic || "—"} />
           <Row label="Developers" a={names(a?.developers)} b={names(b?.developers)} />
           <Row label="Publishers" a={names(a?.publishers)} b={names(b?.publishers)} />
+
+          <SectionHeading>Horror profile</SectionHeading>
+          <Row label="Horror Themes" a={a ? listedNames(a.themes) || NOT_LISTED : "—"} b={b ? listedNames(b.themes) || NOT_LISTED : "—"} />
+          <Row label="Scare Intensity" a={a ? "No community estimate yet" : "—"} b={b ? "No community estimate yet" : "—"} />
+          <Row label="Content Advisories" a={a ? getContentAdvisories(a) : "—"} b={b ? getContentAdvisories(b) : "—"} />
+
+          <SectionHeading>Gameplay & replayability</SectionHeading>
+          <Row label="Game Modes" a={a ? listedNames(a.game_modes) || NOT_LISTED : "—"} b={b ? listedNames(b.game_modes) || NOT_LISTED : "—"} />
+          <Row label="Player Perspective" a={a ? listedNames(a.player_perspectives) || NOT_LISTED : "—"} b={b ? listedNames(b.player_perspectives) || NOT_LISTED : "—"} />
+          <Row label="Combat vs. Avoidance" a={a ? NOT_LISTED : "—"} b={b ? NOT_LISTED : "—"} />
+          <Row label="Game Structure" a={a ? NOT_LISTED : "—"} b={b ? NOT_LISTED : "—"} />
+          <Row label="Main Story Time" a={a ? NOT_LISTED : "—"} b={b ? NOT_LISTED : "—"} />
+          <Row label="Completionist Time" a={a ? NOT_LISTED : "—"} b={b ? NOT_LISTED : "—"} />
+          <Row label="Solo / Co-op Details" a={a ? getMultiplayerDetails(a) : "—"} b={b ? getMultiplayerDetails(b) : "—"} />
+          <Row label="Replayability" a={a ? NOT_LISTED : "—"} b={b ? NOT_LISTED : "—"} />
+
+          <SectionHeading>Best fit</SectionHeading>
+          <p className="mb-2 text-xs text-[color:var(--nf-text-dim)]">
+            Summaries use listed provider metadata only; they are not editorial recommendations.
+          </p>
+          <Row label="Experience Snapshot" a={a ? getBestFit(a) : "—"} b={b ? getBestFit(b) : "—"} />
         </section>
       )}
     </div>
