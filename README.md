@@ -56,6 +56,7 @@ screenshots, compare games, and uncover hidden gems.
 | ---------------- | --------------------------------------- |
 | UI runtime       | React 18                                |
 | Routing          | React Router 7                          |
+| API server       | Express 4                               |
 | Styling          | Tailwind CSS 3                          |
 | Motion           | Framer Motion 11                        |
 | HTTP             | Axios                                   |
