@@ -101,14 +101,13 @@ describe("games API facade", () => {
     );
   });
 
-  it("keeps the bundled demo mode available when the backend URL is unset", async () => {
+  it("does not return demo data when the backend URL is unset", async () => {
     process.env.REACT_APP_BACKEND_URL = "";
     jest.resetModules();
-    const { getTrending, getTrendingHorror, getTopNightmares, isMockMode } = require("./games");
+    const { getTrending } = require("./games");
+    const axios = require("axios");
 
-    expect(isMockMode()).toBe(true);
-    expect(getTrending()).toHaveProperty("results");
-    expect(getTrendingHorror().results).toHaveLength(12);
-    expect(getTopNightmares().results).toHaveLength(10);
+    await expect(getTrending()).rejects.toThrow("REACT_APP_BACKEND_URL is not configured.");
+    expect(axios.get).not.toHaveBeenCalled();
   });
 });

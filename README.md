@@ -42,7 +42,7 @@ screenshots, compare games, and uncover hidden gems.
 - **Compare Games** — side-by-side ratings, release date, rating count, average playtime, ESRB rating, genres, platforms, Metacritic score, developers, and publishers
 - **Random Horror Generator** — "Dare to Play" roulette with cinematic build-up
 - **Theme Customization** — Fog / Blood / Eldritch theme toggle
-- **404, offline detection, missing-backend demo mode**
+- **404, offline detection, and clear API-unavailable states**
 - **Accessibility** — semantic HTML, keyboard nav, ARIA labels, `prefers-reduced-motion`
 - **Performance** — `React.lazy` code splitting, lazy-loaded images, memoized providers, debounced input
 - **Motion** — Framer Motion page transitions, staggered card reveals, hover parallax
@@ -101,7 +101,6 @@ frontend/
     │   ├── SkeletonCard.jsx
     │   ├── ScrollToTop.jsx
     │   ├── OfflineBanner.jsx
-    │   └── MissingKeyBanner.jsx
     ├── constants/
     │   └── testIds.js                # Central registry of data-testid values
     ├── context/
@@ -125,7 +124,6 @@ frontend/
     │   ├── About.jsx
     │   └── NotFound.jsx
     ├── services/
-    │   ├── mockData.js               # Demo data used when the backend URL is unset
     │   └── games.js                  # Express API facade
     └── utils/
         └── format.js                 # Date / rating helpers
@@ -171,8 +169,8 @@ copy .env.example .env
 npm start
 ```
 
-Set `REACT_APP_BACKEND_URL=http://localhost:8001` in `frontend/.env`. Without a backend URL, the
-frontend remains usable in demo mode with bundled sample data.
+Set `REACT_APP_BACKEND_URL=http://localhost:8001` in `frontend/.env`. If the backend URL is unset
+or the API cannot provide data, affected sections show an unavailable message instead of sample data.
 
 ### 3. Production build
 ```bash

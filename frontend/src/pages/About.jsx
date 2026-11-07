@@ -73,7 +73,7 @@ export default function About() {
             <p className="mt-2 text-sm">Built as a portfolio piece for horror-game enthusiasts.</p>
             <div className="mt-4 flex flex-col gap-2 text-sm">
               <a
-                href="https://github.com/rohanbishtofficial04-tech/Resume-Projects/tree/main/DreadVault"
+                href="https://github.com/rohanbishtofficial04-tech/Resume-Projects"
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex items-center gap-2 hover:text-[color:var(--nf-accent-strong)]"

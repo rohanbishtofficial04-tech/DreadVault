@@ -87,7 +87,7 @@ const Hero = ({ games, error }) => {
               <Flame className="inline h-3 w-3 mr-2 -mt-0.5" /> Featured · {game.genres?.slice(0, 3).map((genre) => genre.name).join(" · ") || "Game"}
             </p>
             <h1 className="font-display nf-hero-title text-[clamp(2.75rem,12vw,4rem)] sm:text-6xl md:text-7xl lg:text-[7rem] mt-4 max-w-4xl leading-[0.9] sm:leading-[0.82]">
-              {game.name}
+              {game.name === "Outlast II" ? "Outlast 2" : game.name}
             </h1>
             <div className="mt-6 flex flex-wrap items-center gap-3">
               <RatingBadge
@@ -141,18 +141,21 @@ const Hero = ({ games, error }) => {
           ))}
         </div>
       </div>
+      )}
     </section>
   );
 };
 
-const GenrePlatformStrip = ({ genres, platforms, errors }) => (
+const SECTION_ERROR = "Unable to load section. Please try again later.";
+
+const GenrePlatformStrip = ({ genres, platforms, errors, loading }) => (
   <section className="max-w-[1440px] mx-auto px-6 md:px-10 mt-24 grid gap-12 md:grid-cols-2">
     <div data-testid={TID.sectionGenres}>
       <p className="font-brand text-[11px] tracking-[0.2em] text-[color:var(--nf-text-dim)]">Popular Genres</p>
       <h3 className="font-display text-3xl mt-1">Choose your descent</h3>
       <div className="mt-6 flex flex-wrap gap-2">
-        {errors.genres ? (
-          <p role="status" className="text-sm text-[color:var(--nf-text-dim)]">{errors.genres}</p>
+        {errors.genres || (!loading && genres.length === 0) ? (
+          <p role="status" className="text-sm text-[color:var(--nf-text-dim)]">{errors.genres || SECTION_ERROR}</p>
         ) : selectPopularGenres(genres).map((g) => (
           <Link key={g.id} to={`/browse?genre=${g.slug}`} className="nf-chip">
             {g.name}
@@ -164,8 +167,8 @@ const GenrePlatformStrip = ({ genres, platforms, errors }) => (
       <p className="font-brand text-[11px] tracking-[0.2em] text-[color:var(--nf-text-dim)]">Popular Platforms</p>
       <h3 className="font-display text-3xl mt-1">Pick your device</h3>
       <div className="mt-6 flex flex-wrap gap-2">
-        {errors.platforms ? (
-          <p role="status" className="text-sm text-[color:var(--nf-text-dim)]">{errors.platforms}</p>
+        {errors.platforms || (!loading && platforms.length === 0) ? (
+          <p role="status" className="text-sm text-[color:var(--nf-text-dim)]">{errors.platforms || SECTION_ERROR}</p>
         ) : selectPopularPlatforms(platforms).map((p) => (
           <Link key={p.id} to={`/browse?platform=${p.id}`} className="nf-chip">
             {p.name}
@@ -176,55 +179,60 @@ const GenrePlatformStrip = ({ genres, platforms, errors }) => (
   </section>
 );
 
-const FeaturedCollection = ({ games }) => {
+const FeaturedCollection = ({ games, error }) => {
   const pick = (games || []).slice(0, 5);
-  if (pick.length < 3) return null;
   return (
     <section data-testid={TID.sectionFeatured} className="max-w-[1440px] mx-auto px-6 md:px-10 mt-24">
       <div className="mb-6">
         <p className="font-brand text-[11px] tracking-[0.2em] text-[color:var(--nf-text-dim)]">Featured Collection</p>
         <h2 className="font-display text-3xl md:text-4xl mt-1">Masters of Survival Horror</h2>
       </div>
-      <div className="grid gap-4 grid-cols-1 md:grid-cols-12">
-        <Link
-          to={`/game/${pick[0].slug}`}
-          className="md:col-span-7 relative aspect-[16/10] md:aspect-auto md:min-h-[420px] overflow-hidden group border border-[color:var(--nf-border)]"
-        >
-          <img
-            src={pick[0].background_image}
-            alt={pick[0].name}
-            loading="lazy"
-            decoding="async"
-            className="absolute inset-0 h-full w-full object-cover group-hover:scale-105 transition-transform duration-[700ms] ease-out"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
-          <div className="absolute bottom-0 p-6">
-            <p className="font-brand text-[10px] tracking-[0.2em] text-[color:var(--nf-accent)]">Cornerstone</p>
-            <h3 className="font-display text-4xl mt-1">{pick[0].name}</h3>
+      {error || pick.length < 3 ? (
+        <p role="status" className="py-8 text-sm text-[color:var(--nf-text-dim)]">
+          {error || SECTION_ERROR}
+        </p>
+      ) : (
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-12">
+          <Link
+            to={`/game/${pick[0].slug}`}
+            className="md:col-span-7 relative aspect-[16/10] md:aspect-auto md:min-h-[420px] overflow-hidden group border border-[color:var(--nf-border)]"
+          >
+            <img
+              src={pick[0].background_image}
+              alt={pick[0].name}
+              loading="lazy"
+              decoding="async"
+              className="absolute inset-0 h-full w-full object-cover group-hover:scale-105 transition-transform duration-[700ms] ease-out"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+            <div className="absolute bottom-0 p-6">
+              <p className="font-brand text-[10px] tracking-[0.2em] text-[color:var(--nf-accent)]">Cornerstone</p>
+              <h3 className="font-display text-4xl mt-1">{pick[0].name}</h3>
+            </div>
+          </Link>
+          <div className="md:col-span-5 grid grid-cols-2 gap-4">
+            {pick.slice(1, 5).map((g) => (
+              <Link
+                key={g.id}
+                to={`/game/${g.slug}`}
+                className="relative aspect-square overflow-hidden group border border-[color:var(--nf-border)]"
+              >
+                <img
+                  src={g.background_image}
+                  alt={g.name}
+                  loading="lazy"
+                  decoding="async"
+                  className="absolute inset-0 h-full w-full object-cover group-hover:scale-105 transition-transform duration-[700ms] ease-out"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+                <div className="absolute bottom-0 p-3">
+                  <h4 className="font-display text-lg leading-tight">{g.name}</h4>
+                </div>
+              </Link>
+            ))}
           </div>
-        </Link>
-        <div className="md:col-span-5 grid grid-cols-2 gap-4">
-          {pick.slice(1, 5).map((g) => (
-            <Link
-              key={g.id}
-              to={`/game/${g.slug}`}
-              className="relative aspect-square overflow-hidden group border border-[color:var(--nf-border)]"
-            >
-              <img
-                src={g.background_image}
-                alt={g.name}
-                loading="lazy"
-                decoding="async"
-                className="absolute inset-0 h-full w-full object-cover group-hover:scale-105 transition-transform duration-[700ms] ease-out"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
-              <div className="absolute bottom-0 p-3">
-                <h4 className="font-display text-lg leading-tight">{g.name}</h4>
-              </div>
-            </Link>
-          ))}
         </div>
-      </div>
+      )}
     </section>
   );
 };
@@ -265,13 +273,20 @@ export default function Home() {
         ];
         const keys = ["trending", "top", "recent", "upcoming", "genres", "platforms", "hero"];
         results.forEach((result, index) => {
-          if (result.status === "fulfilled") {
+          if (
+            result.status === "fulfilled" &&
+            Array.isArray(result.value?.results) &&
+            result.value.results.length > 0
+          ) {
             setters[index](result.value);
           } else {
-            console.error(`Unable to load homepage ${keys[index]} data.`, result.reason);
+            const reason = result.status === "rejected"
+              ? result.reason
+              : new Error("The API returned no data.");
+            console.error(`Unable to load homepage ${keys[index]} data.`, reason);
             setErrors((previous) => ({
               ...previous,
-              [keys[index]]: "Unable to load this section. Please try again later.",
+              [keys[index]]: SECTION_ERROR,
             }));
           }
         });
@@ -323,8 +338,8 @@ export default function Home() {
         tid={TID.sectionUpcoming}
         viewAllTo="/browse?sort=released"
       />
-      <GenrePlatformStrip genres={genres} platforms={platforms} errors={errors} />
-      <FeaturedCollection games={top} />
+      <GenrePlatformStrip genres={genres} platforms={platforms} errors={errors} loading={loading} />
+      <FeaturedCollection games={top} error={errors.top} />
     </div>
   );
 }
