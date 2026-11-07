@@ -2,7 +2,8 @@
 
 A cinematic, atmospheric discovery platform for horror video games. Built as a portfolio-grade
 React application backed by IGDB, with RAWG as a fallback. Inspired by Silent Hill, Resident Evil,
-Dead Space, and Alan Wake.
+Dead Space, and Alan Wake. Explore trending and highly rated titles, watch trailers, browse
+screenshots, compare games, and uncover hidden gems.
 
 > Three visual themes are available: **Fog**, **Blood**, and **Eldritch**. Cycle through them
 > from the top-right of the navbar.
