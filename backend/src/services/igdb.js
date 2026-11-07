@@ -12,11 +12,12 @@ const pendingRequests = new Map();
 const MAX_CACHE_SIZE = 100;
 const FEATURED_GAME_SLUGS = [
   "outlast-ii",
+  "dead-by-daylight",
+  "the-dark-pictures-anthology-man-of-medan",
   "silent-hill-2--1",
+  "resident-evil-4--1",
+  "the-evil-within",
   "resident-evil-7-biohazard",
-  "until-dawn",
-  "resident-evil-2--1",
-  "hellblade-senuas-sacrifice",
 ];
 
 const GAME_FIELDS = [

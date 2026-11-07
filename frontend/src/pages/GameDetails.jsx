@@ -546,7 +546,7 @@ export default function GameDetails() {
       </section>
 
       {(ratingDescriptors.length > 0 || ratingSynopses.length > 0) && (
-        <section className="max-w-[1440px] mx-auto px-6 md:px-10 mt-16">
+        <section className="max-w-[1440px] mx-auto px-6 md:px-10 mt-16 select-none cursor-default [-webkit-touch-callout:none]">
           <p className="font-brand text-[11px] tracking-[0.2em] text-[color:var(--nf-text-dim)]">Content & age-rating details</p>
           <h2 className="font-display text-3xl md:text-4xl mt-1">Know what awaits</h2>
           {ratingDescriptors.length > 0 && (
@@ -565,7 +565,7 @@ export default function GameDetails() {
       )}
 
       {regionalRatings.length > 0 && (
-        <section className="max-w-[1440px] mx-auto px-6 md:px-10 mt-16">
+        <section className="max-w-[1440px] mx-auto px-6 md:px-10 mt-16 select-none cursor-default [-webkit-touch-callout:none]">
           <p className="font-brand text-[11px] tracking-[0.2em] text-[color:var(--nf-text-dim)]">Regional age ratings</p>
           <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {regionalRatings.map((rating, index) => (

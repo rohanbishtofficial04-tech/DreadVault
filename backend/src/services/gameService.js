@@ -69,11 +69,12 @@ const releaseYear = (game) => {
 
 const featuredOrder = [
   { title: "outlast 2" },
+  { title: "dead by daylight", year: "2016" },
+  { title: "the dark pictures anthology man of medan", year: "2019" },
   { title: "silent hill 2", year: "2024" },
+  { title: "resident evil 4", year: "2023" },
+  { title: "the evil within", year: "2014" },
   { title: "resident evil 7" },
-  { title: "until dawn", year: "2015" },
-  { title: "resident evil 2", year: "2019" },
-  { title: "hellblade senuas sacrifice" },
 ];
 
 const topNightmareOrder = [

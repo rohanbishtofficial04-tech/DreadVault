@@ -52,28 +52,28 @@ const featuredGames = [
     description_raw: "Investigative journalist Blake Langermann searches for his missing wife in a remote Arizona town gripped by a terrifying religious cult.",
   },
   {
+    ...g(21, "dead-by-daylight", "Dead by Daylight", "2016-06-14", 4.2, 71, IMG.grain, ["Horror", "Action"], ["PC", "PlayStation", "Xbox"]),
+    description_raw: "Four survivors must work together to escape a relentless killer in this asymmetrical multiplayer horror game.",
+  },
+  {
+    ...g(22, "the-dark-pictures-anthology-man-of-medan", "The Dark Pictures Anthology: Man of Medan", "2019-08-30", 3.8, 69, IMG.corridor, ["Horror", "Adventure"], ["PC", "PlayStation", "Xbox"]),
+    description_raw: "A group of friends encounter a nightmare aboard an abandoned World War II ship, where every choice can decide who survives.",
+  },
+  {
     ...g(19, "silent-hill-2-2024", "Silent Hill 2", "2024-10-08", 4.6, 86, IMG.fog, ["Horror", "Adventure"], ["PC", "PlayStation"]),
     description_raw: "James Sunderland returns to the fog-covered town of Silent Hill after receiving a letter from his deceased wife.",
+  },
+  {
+    ...g(23, "resident-evil-4", "Resident Evil 4", "2023-03-24", 4.5, 93, IMG.corridor, ["Horror", "Action"], ["PC", "PlayStation", "Xbox"]),
+    description_raw: "Agent Leon S. Kennedy travels to a remote European village to rescue the president's daughter from a terrifying cult.",
+  },
+  {
+    ...g(24, "the-evil-within", "The Evil Within", "2014-10-14", 4.0, 75, IMG.forest, ["Horror", "Action"], ["PC", "PlayStation", "Xbox"]),
+    description_raw: "Detective Sebastian Castellanos is pulled into a nightmarish world while investigating a gruesome crime scene.",
   },
   {
     ...g(17, "resident-evil-7-biohazard", "Resident Evil 7: Biohazard", "2017-01-24", 4.4, 86, IMG.corridor, ["Horror", "Action"], ["PC", "PlayStation", "Xbox"]),
     description_raw: "Ethan Winters follows a message from his missing wife to a decaying Louisiana plantation and the dangerous Baker family.",
-  },
-  {
-    ...g(18, "until-dawn", "Until Dawn", "2015-08-25", 4.2, 79, IMG.woods, ["Horror", "Adventure"], ["PlayStation"]),
-    description_raw: "Eight friends return to an isolated mountain lodge, where their choices determine who survives the night.",
-  },
-  {
-    ...g(19, "silent-hill-2-2024", "Silent Hill 2", "2024-10-08", 4.6, 86, IMG.fog, ["Horror", "Adventure"], ["PC", "PlayStation"]),
-    description_raw: "James Sunderland returns to the fog-covered town of Silent Hill after receiving a letter from his deceased wife.",
-  },
-  {
-    ...g(20, "resident-evil-2", "Resident Evil 2", "2019-01-25", 4.6, 91, IMG.corridor, ["Horror", "Action"], ["PC", "PlayStation", "Xbox"]),
-    description_raw: "Newcomer Leon Kennedy and college student Claire Redfield fight to escape Raccoon City during a zombie outbreak.",
-  },
-  {
-    ...g(16, "hellblade-senuas-sacrifice", "Hellblade: Senua's Sacrifice", "2017-08-08", 4.3, 81, IMG.forest, ["Action", "Adventure"], ["PC", "PlayStation", "Xbox"]),
-    description_raw: "Celtic warrior Senua journeys into a haunting vision of the Viking afterlife to save the soul of her lost beloved.",
   },
 ];
 
@@ -219,21 +219,27 @@ export default {
   genres: () =>
     listResp([
       { id: "horror", slug: "horror", name: "Horror" },
+      { id: "shooter", slug: "shooter", name: "Shooter" },
+      { id: "survival", slug: "survival", name: "Survival" },
       { id: "adventure", slug: "adventure", name: "Adventure" },
       { id: "action", slug: "action", name: "Action" },
       { id: "indie", slug: "indie", name: "Indie" },
+      { id: "platform", slug: "platform", name: "Platform" },
+      { id: "puzzle", slug: "puzzle", name: "Puzzle" },
       { id: "rpg", slug: "role-playing-games-rpg", name: "RPG" },
+      { id: "strategy", slug: "strategy", name: "Strategy" },
     ]),
   platforms: () =>
     listResp([
       { id: 4, slug: "pc", name: "PC" },
       { id: 187, slug: "playstation5", name: "PlayStation 5" },
+      { id: 186, slug: "xbox-series-x", name: "Xbox Series X|S" },
+      { id: "switch-2", slug: "switch-2", name: "Nintendo Switch 2" },
       { id: 18, slug: "playstation4", name: "PlayStation 4" },
-      { id: 16, slug: "playstation3", name: "PlayStation 3" },
-      { id: 15, slug: "playstation2", name: "PlayStation 2" },
-      { id: 14, slug: "xbox360", name: "Xbox 360" },
       { id: 1, slug: "xbox-one", name: "Xbox One" },
-      { id: 186, slug: "xbox-series-x", name: "Xbox Series S/X" },
       { id: 7, slug: "nintendo-switch", name: "Nintendo Switch" },
+      { id: 16, slug: "playstation3", name: "PlayStation 3" },
+      { id: 14, slug: "xbox360", name: "Xbox 360" },
+      { id: 15, slug: "playstation2", name: "PlayStation 2" },
     ]),
 };

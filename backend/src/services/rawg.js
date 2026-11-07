@@ -44,11 +44,12 @@ const request = (path, params = {}, ttl = 5 * 60 * 1000) => {
 const dateRange = (from, to) => `${from.toISOString().slice(0, 10)},${to.toISOString().slice(0, 10)}`;
 const featuredGameQueries = [
   { query: "Outlast 2", title: "outlast 2" },
+  { query: "Dead by Daylight", title: "dead by daylight", year: "2016" },
+  { query: "The Dark Pictures Anthology Man of Medan", title: "the dark pictures anthology man of medan", year: "2019" },
   { query: "Silent Hill 2", title: "silent hill 2", year: "2024" },
+  { query: "Resident Evil 4", title: "resident evil 4", year: "2023" },
+  { query: "The Evil Within", title: "the evil within", year: "2014" },
   { query: "Resident Evil 7", title: "resident evil 7" },
-  { query: "Until Dawn", title: "until dawn", year: "2015" },
-  { query: "Resident Evil 2", title: "resident evil 2", year: "2019" },
-  { query: "Hellblade Senua's Sacrifice", title: "hellblade senuas sacrifice" },
 ];
 
 const normalizeTitle = (value) => String(value || "")

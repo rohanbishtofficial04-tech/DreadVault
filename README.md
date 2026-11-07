@@ -13,10 +13,10 @@ screenshots, compare games, and uncover hidden gems.
 ## Recent Updates
 
 - Added a separate Express API with IGDB as the primary horror-game provider and RAWG as a server-side fallback.
-- Added a six-game hero carousel with a smooth slide transition, seven-second autoplay, and dot navigation for Outlast 2, Silent Hill 2 (2024), Resident Evil 7, Until Dawn, Resident Evil 2 (2019), and Hellblade: Senua's Sacrifice.
+- Added a seven-game hero carousel with a smooth slide transition, five-second autoplay, and dot navigation. Dead by Daylight is second and The Dark Pictures Anthology: Man of Medan is third.
 - Expanded game details with horror themes and keywords, content-rating descriptors, supported languages, release dates by platform, DLC/expansions, franchise timelines, and separate player/critic rating counts. Accessibility details are identified as unavailable when providers do not supply them.
 - Added multiplayer/co-op information, game engine metadata, regional age ratings, port/remake/remaster relationships, and categorized official, storefront, and community links when game data providers supply them.
-- Added a 7-second sliding homepage hero for **Outlast 2**, **Silent Hill 2 (2024)**, **Resident Evil 7**, **Until Dawn**, **Resident Evil 2 (2019)**, and **Hellblade: Senua's Sacrifice**. Dot navigation resets the timer, and slides show game details without RAWG heading markers.
+- Added a five-second sliding homepage hero for **Outlast 2**, **Dead by Daylight**, **The Dark Pictures Anthology: Man of Medan**, **Silent Hill 2 (2024)**, **Resident Evil 4 (2023)**, **The Evil Within**, and **Resident Evil 7**. Dot navigation resets the timer, and slides show game details without RAWG heading markers.
 - Expanded game comparisons with rating counts, average playtime, ESRB ratings, developers, and publishers.
 - Hid scrollbar visuals across the app while preserving mouse, touch, and keyboard scrolling.
 - Improved the responsive game details hero and back-navigation layout.

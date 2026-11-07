@@ -15,40 +15,34 @@ import { GameCarousel } from "@/components/GameCarousel";
 import { RatingBadge } from "@/components/RatingBadge";
 import { PlatformBadges } from "@/components/PlatformBadges";
 import { formatYear, stripHtml } from "@/utils/format";
+import { selectPopularGenres, selectPopularPlatforms } from "@/utils/popularCatalog";
 import { ChevronRight, Flame, Play } from "lucide-react";
 
-const HERO_SLIDE_DURATION = 7000;
-const POPULAR_PLATFORMS = [
-  ["playstation 5"],
-  ["xbox series x s", "xbox series x", "xbox series s"],
-  ["nintendo switch 2", "switch 2"],
-  ["playstation 4", "ps4"],
-  ["playstation 3", "ps3"],
-  ["playstation 2", "ps2"],
-  ["xbox 360"],
-];
-
-const selectPopularPlatforms = (platforms = []) => {
-  const normalize = (value) => String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
-  return POPULAR_PLATFORMS
-    .map((aliases) => platforms.find((platform) =>
-      aliases.includes(normalize(platform.name)) || aliases.includes(normalize(platform.slug))
-    ))
-    .filter(Boolean);
-};
+const HERO_SLIDE_DURATION = 5000;
 
 const Hero = ({ games, error }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [timerReset, setTimerReset] = useState(0);
+  const [isPageVisible, setIsPageVisible] = useState(
+    () => typeof document === "undefined" || document.visibilityState === "visible"
+  );
   const game = games[activeIndex];
 
   useEffect(() => {
-    if (games.length < 2) return undefined;
+    const handleVisibilityChange = () => {
+      setIsPageVisible(document.visibilityState === "visible");
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, []);
+
+  useEffect(() => {
+    if (games.length < 2 || !isPageVisible) return undefined;
     const timer = setTimeout(() => {
       setActiveIndex((index) => (index + 1) % games.length);
     }, HERO_SLIDE_DURATION);
     return () => clearTimeout(timer);
-  }, [games.length, activeIndex, timerReset]);
+  }, [games.length, activeIndex, isPageVisible, timerReset]);
 
   if (!game) {
     return error ? (
@@ -159,7 +153,7 @@ const GenrePlatformStrip = ({ genres, platforms, errors }) => (
       <div className="mt-6 flex flex-wrap gap-2">
         {errors.genres ? (
           <p role="status" className="text-sm text-[color:var(--nf-text-dim)]">{errors.genres}</p>
-        ) : (genres || []).slice(0, 10).map((g) => (
+        ) : selectPopularGenres(genres).map((g) => (
           <Link key={g.id} to={`/browse?genre=${g.slug}`} className="nf-chip">
             {g.name}
           </Link>

@@ -50,23 +50,27 @@ test("uses IGDB as the primary provider and returns normalized list results", as
 
 test("returns curated carousel games in the requested order", async () => {
   igdb.fetchFeaturedGames = async () => [
-    { id: 6, slug: "hellblade-senuas-sacrifice", name: "Hellblade: Senua's Sacrifice" },
-    { id: 5, slug: "resident-evil-2--1", name: "Resident Evil 2", first_release_date: 1548374400 },
-    { id: 4, slug: "until-dawn", name: "Until Dawn", first_release_date: 1440460800 },
-    { id: 3, slug: "resident-evil-7-biohazard", name: "Resident Evil 7: Biohazard" },
-    { id: 2, slug: "silent-hill-2--1", name: "Silent Hill 2", first_release_date: 1728345600 },
+    { id: 8, slug: "the-evil-within", name: "The Evil Within", first_release_date: 1413244800 },
+    { id: 7, slug: "resident-evil-4--1", name: "Resident Evil 4", first_release_date: 1679616000 },
+    { id: 5, slug: "resident-evil-7-biohazard", name: "Resident Evil 7: Biohazard" },
+    { id: 4, slug: "silent-hill-2--1", name: "Silent Hill 2", first_release_date: 1728345600 },
+    { id: 3, slug: "the-dark-pictures-anthology-man-of-medan", name: "The Dark Pictures Anthology: Man of Medan", first_release_date: 1566432000 },
+    { id: 2, slug: "dead-by-daylight", name: "Dead by Daylight", first_release_date: 1465948800 },
     { id: 1, slug: "outlast-ii", name: "Outlast II" },
   ];
 
   const result = await gameService.getFeaturedGames();
-  assert.deepEqual(result.results.map((game) => game.id), [
-    "igdb-1",
-    "igdb-2",
-    "igdb-3",
-    "igdb-4",
-    "igdb-5",
-    "igdb-6",
+  assert.deepEqual(result.results.map((game) => game.name), [
+    "Outlast II",
+    "Dead by Daylight",
+    "The Dark Pictures Anthology: Man of Medan",
+    "Silent Hill 2",
+    "Resident Evil 4",
+    "The Evil Within",
+    "Resident Evil 7: Biohazard",
   ]);
+  assert.equal(result.results.some((game) => game.name === "Resident Evil 2"), false);
+  assert.equal(result.results.some((game) => game.name === "Hellblade: Senua's Sacrifice"), false);
 });
 
 test("returns the top nightmares in curated order and selects the requested releases", async () => {
@@ -167,12 +171,12 @@ test("keeps RAWG detail fallback horror-filtered except for curated carousel tit
 
   rawg.fetchGameDetails = async () => ({
     id: 4,
-    slug: "hellblade-senuas-sacrifice",
-    name: "Hellblade: Senua's Sacrifice",
-    released: "2017-08-08",
+    slug: "resident-evil-4--1",
+    name: "Resident Evil 4",
+    released: "2023-03-24",
     genres: [{ slug: "adventure", name: "Adventure" }],
   });
-  assert.equal((await gameService.getDetails("hellblade-senuas-sacrifice")).id, 4);
+  assert.equal((await gameService.getDetails("resident-evil-4--1")).id, 4);
 });
 
 test("falls back to RAWG when IGDB throws, and surfaces dual provider failures", async () => {
