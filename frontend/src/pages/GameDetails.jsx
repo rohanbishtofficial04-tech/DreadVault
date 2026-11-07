@@ -486,6 +486,19 @@ export default function GameDetails() {
           <p className="mt-6 text-[color:var(--nf-text-dim)] leading-relaxed whitespace-pre-line">
             {stripHtml(game.description_raw || game.description || "No description available.")}
           </p>
+          <figure className="relative mt-8 aspect-[16/10] overflow-hidden border border-white/10 bg-black">
+            <img
+              src={game.background_image_additional || screens[0]?.image || game.background_image}
+              alt={`${game.name} artwork`}
+              loading="lazy"
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/20" />
+            <figcaption className="absolute inset-x-0 bottom-0 p-5 sm:p-7">
+              <p className="font-brand text-[10px] tracking-[0.2em] text-white/70">A glimpse into the nightmare</p>
+              <p className="mt-1 font-display text-2xl text-white sm:text-3xl">{game.name}</p>
+            </figcaption>
+          </figure>
         </div>
 
         <aside className="space-y-6">
