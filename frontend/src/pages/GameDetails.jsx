@@ -404,7 +404,6 @@ export default function GameDetails() {
               navigate(location.key === "default" ? "/browse" : -1)
             }
             className="nf-btn min-h-11 min-w-11 px-3 sm:px-5 shadow-lg"
-            style={{ backgroundColor: "var(--nf-bg)" }}
             aria-label="Back to browse"
           >
             <ArrowLeft className="h-3.5 w-3.5" /> Back
@@ -486,19 +485,49 @@ export default function GameDetails() {
           <p className="mt-6 text-[color:var(--nf-text-dim)] leading-relaxed whitespace-pre-line">
             {stripHtml(game.description_raw || game.description || "No description available.")}
           </p>
-          <figure className="relative mt-8 aspect-[16/10] overflow-hidden border border-white/10 bg-black">
-            <img
-              src={game.background_image_additional || screens[0]?.image || game.background_image}
-              alt={`${game.name} artwork`}
-              loading="lazy"
-              className="absolute inset-0 h-full w-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/20" />
-            <figcaption className="absolute inset-x-0 bottom-0 p-4 sm:p-7">
-              <p className="font-brand text-[9px] tracking-[0.16em] text-white/70 sm:text-[10px] sm:tracking-[0.2em]">A glimpse into the nightmare</p>
-              <p className="mt-0.5 font-display text-lg leading-tight text-white sm:mt-1 sm:text-3xl">{game.name}</p>
-            </figcaption>
-          </figure>
+          {(screens.length > 0 || screensError) && (
+            <section data-testid={TID.detailsScreenshots} className="mt-10">
+              <p className="font-brand text-[11px] tracking-[0.2em] text-[color:var(--nf-text-dim)]">Screenshots</p>
+              <h2 className="font-display text-3xl md:text-4xl mt-1">Fragments</h2>
+              {screensError ? (
+                <p role="status" className="mt-6 text-sm text-[color:var(--nf-text-dim)]">{screensError}</p>
+              ) : (
+                <div className="mt-6 grid gap-3 grid-cols-2 md:grid-cols-3">
+                  {visibleScreens.map((s, i) => (
+                    <button
+                      key={s.id}
+                      onClick={() => setLightbox(i)}
+                      className={`relative overflow-hidden border border-[color:var(--nf-border)] group ${
+                        i === 0 ? "md:col-span-2 md:row-span-2" : ""
+                      }`}
+                    >
+                      <img
+                        src={s.image}
+                        alt={`Screenshot ${i + 1}`}
+                        className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-[600ms] ease-out"
+                        loading="lazy"
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
+          <section className="mt-10">
+            <p className="font-brand text-[11px] tracking-[0.2em] text-[color:var(--nf-text-dim)]">Game Trailer</p>
+            <h2 className="font-display text-3xl md:text-4xl mt-1">{game.name}</h2>
+            {trailer ? (
+              <TrailerVideo
+                src={trailer}
+                poster={game.background_image}
+                className="mt-6 w-full"
+              />
+            ) : (
+              <p role={moviesError ? "status" : undefined} className="mt-6 border border-[color:var(--nf-border)] p-5 text-sm text-[color:var(--nf-text-dim)]">
+                {moviesError || "Not available"}
+              </p>
+            )}
+          </section>
         </div>
 
         <aside className="space-y-6">
@@ -559,7 +588,7 @@ export default function GameDetails() {
       </section>
 
       {(ratingDescriptors.length > 0 || ratingSynopses.length > 0) && (
-        <section className="max-w-[1440px] mx-auto px-6 md:px-10 mt-16 select-none cursor-default [-webkit-touch-callout:none]">
+        <section className="nf-nonselectable max-w-[1440px] mx-auto px-6 md:px-10 mt-16 cursor-default">
           <p className="font-brand text-[11px] tracking-[0.2em] text-[color:var(--nf-text-dim)]">Content & age-rating details</p>
           <h2 className="font-display text-3xl md:text-4xl mt-1">Know what awaits</h2>
           {ratingDescriptors.length > 0 && (
@@ -578,7 +607,7 @@ export default function GameDetails() {
       )}
 
       {regionalRatings.length > 0 && (
-        <section className="max-w-[1440px] mx-auto px-6 md:px-10 mt-16 select-none cursor-default [-webkit-touch-callout:none]">
+        <section className="nf-nonselectable max-w-[1440px] mx-auto px-6 md:px-10 mt-16 cursor-default">
           <p className="font-brand text-[11px] tracking-[0.2em] text-[color:var(--nf-text-dim)]">Regional age ratings</p>
           <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {regionalRatings.map((rating, index) => (
@@ -740,49 +769,6 @@ export default function GameDetails() {
               ))}
             </div>
           )}
-        </section>
-      )}
-
-      <section className="max-w-[1440px] mx-auto px-6 md:px-10 mt-20">
-        <p className="font-brand text-[11px] tracking-[0.2em] text-[color:var(--nf-text-dim)]">Game Trailer</p>
-        <h2 className="font-display text-3xl md:text-4xl mt-1">{game.name}</h2>
-        {trailer ? (
-          <TrailerVideo
-            src={trailer}
-            poster={game.background_image}
-            className="mt-6 w-full"
-          />
-        ) : (
-          <p role={moviesError ? "status" : undefined} className="mt-6 border border-[color:var(--nf-border)] p-5 text-sm text-[color:var(--nf-text-dim)]">
-            {moviesError || "Not available"}
-          </p>
-        )}
-      </section>
-
-      {(screens.length > 0 || screensError) && (
-        <section data-testid={TID.detailsScreenshots} className="max-w-[1440px] mx-auto px-6 md:px-10 mt-20">
-          <p className="font-brand text-[11px] tracking-[0.2em] text-[color:var(--nf-text-dim)]">Screenshots</p>
-          <h2 className="font-display text-3xl md:text-4xl mt-1">Fragments</h2>
-          {screensError ? (
-            <p role="status" className="mt-6 text-sm text-[color:var(--nf-text-dim)]">{screensError}</p>
-          ) : <div className="mt-6 grid gap-3 grid-cols-2 md:grid-cols-3">
-            {visibleScreens.map((s, i) => (
-              <button
-                key={s.id}
-                onClick={() => setLightbox(i)}
-                className={`relative overflow-hidden border border-[color:var(--nf-border)] group ${
-                  i === 0 ? "md:col-span-2 md:row-span-2" : ""
-                }`}
-              >
-                <img
-                  src={s.image}
-                  alt={`Screenshot ${i + 1}`}
-                  className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-[600ms] ease-out"
-                  loading="lazy"
-                />
-              </button>
-            ))}
-          </div>}
         </section>
       )}
 
