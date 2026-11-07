@@ -494,9 +494,9 @@ export default function GameDetails() {
               className="absolute inset-0 h-full w-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/20" />
-            <figcaption className="absolute inset-x-0 bottom-0 p-5 sm:p-7">
-              <p className="font-brand text-[10px] tracking-[0.2em] text-white/70">A glimpse into the nightmare</p>
-              <p className="mt-1 font-display text-2xl text-white sm:text-3xl">{game.name}</p>
+            <figcaption className="absolute inset-x-0 bottom-0 p-4 sm:p-7">
+              <p className="font-brand text-[9px] tracking-[0.16em] text-white/70 sm:text-[10px] sm:tracking-[0.2em]">A glimpse into the nightmare</p>
+              <p className="mt-0.5 font-display text-lg leading-tight text-white sm:mt-1 sm:text-3xl">{game.name}</p>
             </figcaption>
           </figure>
         </div>
