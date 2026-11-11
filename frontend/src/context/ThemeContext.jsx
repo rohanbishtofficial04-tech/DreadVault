@@ -1,16 +1,20 @@
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
+import { getNextTheme, getThemeOrder } from "@/utils/themeOrder";
 
 const ThemeContext = createContext({ theme: "fog", setTheme: () => {}, toggleTheme: () => {} });
 
 const KEY = "nightfall:theme";
-const THEMES = ["fog", "blood", "eldritch"];
+const THEMES = getThemeOrder(false);
+
+const isMobileViewport = () =>
+  typeof window !== "undefined" &&
+  (window.matchMedia
+    ? window.matchMedia("(max-width: 767px)").matches
+    : window.innerWidth < 768);
 
 const getDefaultTheme = () => {
   if (typeof window === "undefined") return "fog";
-  const isMobile = window.matchMedia
-    ? window.matchMedia("(max-width: 767px)").matches
-    : window.innerWidth < 768;
-  return isMobile ? "blood" : "fog";
+  return isMobileViewport() ? "blood" : "fog";
 };
 
 export const ThemeProvider = ({ children }) => {
@@ -30,7 +34,7 @@ export const ThemeProvider = ({ children }) => {
     setThemeState(THEMES.includes(t) ? t : getDefaultTheme());
   }, []);
   const toggleTheme = useCallback(
-    () => setThemeState((t) => THEMES[(THEMES.indexOf(t) + 1) % THEMES.length]),
+    () => setThemeState((theme) => getNextTheme(theme, getThemeOrder(isMobileViewport()))),
     []
   );
 

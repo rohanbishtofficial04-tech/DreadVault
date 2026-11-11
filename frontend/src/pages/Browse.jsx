@@ -6,6 +6,7 @@ import { GameGrid } from "@/components/GameGrid";
 import { TID } from "@/constants/testIds";
 import {
   prioritizePopularItems,
+  selectBrowseGenres,
   selectPopularGenres,
   selectPopularPlatforms,
 } from "@/utils/popularCatalog";
@@ -134,7 +135,8 @@ export default function Browse() {
     () => [genre, platform, year, rating, search].filter(Boolean).length,
     [genre, platform, year, rating, search]
   );
-  const orderedGenres = prioritizePopularItems(genres, selectPopularGenres(genres));
+  const browseGenres = selectBrowseGenres(genres);
+  const orderedGenres = prioritizePopularItems(browseGenres, selectPopularGenres(browseGenres));
   const orderedPlatforms = prioritizePopularItems(platforms, selectPopularPlatforms(platforms));
 
   const FiltersInner = (

@@ -1,10 +1,16 @@
 import { useTheme } from "@/context/ThemeContext";
 import { TID } from "@/constants/testIds";
+import { getNextTheme, getThemeOrder } from "@/utils/themeOrder";
 import { Cloud, Droplet, Sparkles } from "lucide-react";
 
 export const ThemeToggle = () => {
   const { theme, toggleTheme } = useTheme();
-  const nextTheme = { fog: "Blood", blood: "Eldritch", eldritch: "Fog" }[theme] || "Blood";
+  const isMobile = typeof window !== "undefined" && (
+    window.matchMedia
+      ? window.matchMedia("(max-width: 767px)").matches
+      : window.innerWidth < 768
+  );
+  const nextTheme = getNextTheme(theme, getThemeOrder(isMobile));
   const themeName = theme.charAt(0).toUpperCase() + theme.slice(1);
   return (
     <button

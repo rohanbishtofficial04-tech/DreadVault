@@ -37,6 +37,11 @@ const selectCatalogItems = (items = [], preferredNames) =>
 
 export const selectPopularGenres = (genres) => selectCatalogItems(genres, POPULAR_GENRES);
 export const selectPopularPlatforms = (platforms) => selectCatalogItems(platforms, POPULAR_PLATFORMS);
+export const selectBrowseGenres = (genres = []) =>
+  genres.filter((genre) =>
+    normalizeCatalogName(genre.name) !== "horror" &&
+    normalizeCatalogName(genre.slug) !== "horror"
+  );
 
 export const prioritizePopularItems = (items = [], popularItems = []) => {
   const popularIds = new Set(popularItems.map((item) => item.id ?? item.slug));
