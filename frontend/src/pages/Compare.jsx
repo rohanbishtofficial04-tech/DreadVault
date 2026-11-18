@@ -7,6 +7,7 @@ import {
   getBestFit,
   getContentAdvisories,
   getMultiplayerDetails,
+  isSameGame,
   NOT_LISTED,
 } from "@/utils/compare";
 import { RatingBadge } from "@/components/RatingBadge";
@@ -15,7 +16,7 @@ import { Link } from "react-router-dom";
 
 const SLOTS = ["A", "B"];
 
-const useOptions = () => {
+const useOptions = (slot) => {
   const [q, setQ] = useState("");
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -28,7 +29,11 @@ const useOptions = () => {
       setError("");
       if (!debounced.trim()) {
         try {
-          const data = await getBrowse({ page_size: 12, ordering: "-added" });
+          const data = await getBrowse({
+            page: slot === "B" ? 2 : 1,
+            page_size: 12,
+            ordering: "-added",
+          });
           if (!cancel) setOptions(data?.results || []);
         } catch (requestError) {
           if (!cancel) {
@@ -57,12 +62,14 @@ const useOptions = () => {
     return () => {
       cancel = true;
     };
-  }, [debounced]);
+  }, [debounced, slot]);
   return { q, setQ, options, loading, error };
 };
 
-const Picker = ({ slot, selected, onPick, onClear, testId, detailError }) => {
-  const { q, setQ, options, loading, error } = useOptions();
+const Picker = ({ slot, selected, otherSelected, onPick, onClear, testId, detailError }) => {
+  const { q, setQ, options, loading, error } = useOptions(slot);
+  const availableOptions = options.filter((game) => !isSameGame(game, otherSelected));
+  const hasExcludedOption = availableOptions.length !== options.length;
   if (selected) {
     return (
       <div className="border border-[color:var(--nf-border)] bg-[color:var(--nf-surface)]">
@@ -99,11 +106,13 @@ const Picker = ({ slot, selected, onPick, onClear, testId, detailError }) => {
       <ul className="mt-3 max-h-64 overflow-y-auto divide-y divide-white/5">
         {loading && <li className="py-3 text-xs text-[color:var(--nf-text-dim)]">Searching…</li>}
         {!loading && error && <li role="status" className="py-3 text-xs text-[color:var(--nf-text-dim)]">{error}</li>}
-        {!loading && !error && options.length === 0 && (
-          <li className="py-3 text-xs text-[color:var(--nf-text-dim)]">No games found.</li>
+        {!loading && !error && availableOptions.length === 0 && (
+          <li className="py-3 text-xs text-[color:var(--nf-text-dim)]">
+            {hasExcludedOption ? "Already selected in the other slot." : "No games found."}
+          </li>
         )}
         {!loading && !error &&
-          options.map((g) => (
+          availableOptions.map((g) => (
             <li key={g.id}>
               <button
                 onClick={() => onPick(g)}
@@ -139,11 +148,19 @@ const gen = (g) => (g?.genres || []).map((x) => x.name).join(", ") || "—";
 const pl = (g) => (g?.parent_platforms || g?.platforms || []).map((p) => p.platform?.name || p.name).join(", ") || "—";
 const ratingCount = (g) => g?.ratings_count > 0 ? new Intl.NumberFormat("en-US").format(g.ratings_count) : "—";
 const playtime = (g) => g?.playtime > 0 ? `${g.playtime} hr${g.playtime === 1 ? "" : "s"}` : "—";
+const hasRating = (game) =>
+  [game?.rating, game?.metacritic, game?.critic_rating, game?.rawg_rating]
+    .some((value) => Number.isFinite(value) && value > 0);
 const esrbRating = (g) =>
   typeof g?.esrb_rating === "string" ? g.esrb_rating : g?.esrb_rating?.name || "—";
 const names = (items) => items?.map((item) => item.name).filter(Boolean).join(", ") || "—";
 const listedNames = (items) => items?.map((item) => item.name).filter(Boolean).join(", ");
-
+const hasComparisonValue = (value) =>
+  value != null &&
+  value !== "—" &&
+  value !== NOT_LISTED &&
+  value !== "No community estimate yet" &&
+  (typeof value !== "string" || value.trim().length > 0);
 const SectionHeading = ({ children }) => (
   <h2 className="font-display text-2xl mt-10 mb-2">{children}</h2>
 );
@@ -168,6 +185,67 @@ export default function Compare() {
     }
   };
 
+  const comparisonSections = [
+    {
+      title: "At a glance",
+      rows: [
+        {
+          label: "Title",
+          a: a ? <Link to={`/game/${a.slug}`} className="font-display text-xl">{a.name}</Link> : "—",
+          b: b ? <Link to={`/game/${b.slug}`} className="font-display text-xl">{b.name}</Link> : "—",
+        },
+        {
+          label: "Rating",
+          a: hasRating(a) ? <RatingBadge value={a.rating} metacritic={a.metacritic} criticRating={a.critic_rating} rawgRating={a.rawg_rating} provider={a.provider} compact /> : "—",
+          b: hasRating(b) ? <RatingBadge value={b.rating} metacritic={b.metacritic} criticRating={b.critic_rating} rawgRating={b.rawg_rating} provider={b.provider} compact /> : "—",
+        },
+        { label: "Released", a: a?.released || "—", b: b?.released || "—" },
+        { label: "Rating Count", a: ratingCount(a), b: ratingCount(b) },
+        { label: "Average Playtime", a: playtime(a), b: playtime(b) },
+        { label: "ESRB Rating", a: esrbRating(a), b: esrbRating(b) },
+        { label: "Genres", a: gen(a), b: gen(b) },
+        { label: "Platforms", a: pl(a), b: pl(b) },
+        { label: "Metacritic", a: a?.metacritic || "—", b: b?.metacritic || "—" },
+        { label: "Developers", a: names(a?.developers), b: names(b?.developers) },
+        { label: "Publishers", a: names(a?.publishers), b: names(b?.publishers) },
+      ],
+    },
+    {
+      title: "Horror profile",
+      rows: [
+        { label: "Horror Themes", a: a ? listedNames(a.themes) || NOT_LISTED : "—", b: b ? listedNames(b.themes) || NOT_LISTED : "—" },
+        { label: "Content Advisories", a: a ? getContentAdvisories(a) : "—", b: b ? getContentAdvisories(b) : "—" },
+      ],
+    },
+    {
+      title: "Gameplay & replayability",
+      rows: [
+        { label: "Game Modes", a: a ? listedNames(a.game_modes) || NOT_LISTED : "—", b: b ? listedNames(b.game_modes) || NOT_LISTED : "—" },
+        { label: "Player Perspective", a: a ? listedNames(a.player_perspectives) || NOT_LISTED : "—", b: b ? listedNames(b.player_perspectives) || NOT_LISTED : "—" },
+        { label: "Solo / Co-op Details", a: a ? getMultiplayerDetails(a) : "—", b: b ? getMultiplayerDetails(b) : "—" },
+      ],
+    },
+    {
+      title: "Best fit",
+      description: "Summaries use listed provider metadata only; they are not editorial recommendations.",
+      rows: [
+        { label: "Experience Snapshot", a: a ? getBestFit(a) : "—", b: b ? getBestFit(b) : "—" },
+      ],
+    },
+  ];
+  const visibleSections = comparisonSections
+    .map((section) => ({
+      ...section,
+      rows: section.rows
+        .filter((row) => hasComparisonValue(row.a) || hasComparisonValue(row.b))
+        .map((row) => ({
+          ...row,
+          a: hasComparisonValue(row.a) ? row.a : "—",
+          b: hasComparisonValue(row.b) ? row.b : "—",
+        })),
+    }))
+    .filter((section) => section.rows.length > 0);
+
   return (
     <div data-testid={TID.comparePage} className="max-w-[1440px] mx-auto px-6 md:px-10 pt-14 pb-24">
       <div className="mb-10">
@@ -180,49 +258,51 @@ export default function Compare() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
-        <Picker slot={SLOTS[0]} selected={a} onPick={(game) => selectGame(SLOTS[0], game)} onClear={() => setA(null)} testId={TID.compareSelectA} detailError={detailErrors.A} />
-        <Picker slot={SLOTS[1]} selected={b} onPick={(game) => selectGame(SLOTS[1], game)} onClear={() => setB(null)} testId={TID.compareSelectB} detailError={detailErrors.B} />
+        <Picker slot={SLOTS[0]} selected={a} otherSelected={b} onPick={(game) => selectGame(SLOTS[0], game)} onClear={() => setA(null)} testId={TID.compareSelectA} detailError={detailErrors.A} />
+        <Picker slot={SLOTS[1]} selected={b} otherSelected={a} onPick={(game) => selectGame(SLOTS[1], game)} onClear={() => setB(null)} testId={TID.compareSelectB} detailError={detailErrors.B} />
       </div>
 
       {(a || b) && (
         <section className="mt-10">
-          <SectionHeading>At a glance</SectionHeading>
-          <Row
-            label="Title"
-            a={a ? <Link to={`/game/${a.slug}`} className="font-display text-xl">{a.name}</Link> : "—"}
-            b={b ? <Link to={`/game/${b.slug}`} className="font-display text-xl">{b.name}</Link> : "—"}
-          />
-          <Row label="Rating" a={a ? <RatingBadge value={a.rating} metacritic={a.metacritic} criticRating={a.critic_rating} provider={a.provider} compact /> : "—"} b={b ? <RatingBadge value={b.rating} metacritic={b.metacritic} criticRating={b.critic_rating} provider={b.provider} compact /> : "—"} />
-          <Row label="Released" a={a?.released || "—"} b={b?.released || "—"} />
-          <Row label="Rating Count" a={ratingCount(a)} b={ratingCount(b)} />
-          <Row label="Average Playtime" a={playtime(a)} b={playtime(b)} />
-          <Row label="ESRB Rating" a={esrbRating(a)} b={esrbRating(b)} />
-          <Row label="Genres" a={gen(a)} b={gen(b)} />
-          <Row label="Platforms" a={pl(a)} b={pl(b)} />
-          <Row label="Metacritic" a={a?.metacritic || "—"} b={b?.metacritic || "—"} />
-          <Row label="Developers" a={names(a?.developers)} b={names(b?.developers)} />
-          <Row label="Publishers" a={names(a?.publishers)} b={names(b?.publishers)} />
+          <div className="sticky top-16 z-30 -mx-2 border border-[color:var(--nf-border)] bg-black/95 backdrop-blur-md">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-3">
+              <p className="hidden sm:block self-center font-brand text-[10px] tracking-[0.2em] text-[color:var(--nf-text-dim)]">
+                GAME / ATTRIBUTE
+              </p>
+              {[[SLOTS[0], a], [SLOTS[1], b]].map(([slot, game]) => (
+                <div key={slot} className="min-w-0 border-l border-[color:var(--nf-border)] pl-3">
+                  <p className="font-brand text-[9px] tracking-[0.2em] text-[color:var(--nf-accent)]">SLOT {slot}</p>
+                  {game ? (
+                    <Link to={`/game/${game.slug}`} className="block truncate font-display text-base hover:text-[color:var(--nf-accent-strong)]">
+                      {game.name}
+                    </Link>
+                  ) : (
+                    <p className="truncate font-display text-base text-[color:var(--nf-text-dim)]">Choose a game</p>
+                  )}
+                  {game?.released && (
+                    <p className="font-brand text-[9px] text-[color:var(--nf-text-dim)]">{formatYear(game.released)}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
 
-          <SectionHeading>Horror profile</SectionHeading>
-          <Row label="Horror Themes" a={a ? listedNames(a.themes) || NOT_LISTED : "—"} b={b ? listedNames(b.themes) || NOT_LISTED : "—"} />
-          <Row label="Scare Intensity" a={a ? "No community estimate yet" : "—"} b={b ? "No community estimate yet" : "—"} />
-          <Row label="Content Advisories" a={a ? getContentAdvisories(a) : "—"} b={b ? getContentAdvisories(b) : "—"} />
-
-          <SectionHeading>Gameplay & replayability</SectionHeading>
-          <Row label="Game Modes" a={a ? listedNames(a.game_modes) || NOT_LISTED : "—"} b={b ? listedNames(b.game_modes) || NOT_LISTED : "—"} />
-          <Row label="Player Perspective" a={a ? listedNames(a.player_perspectives) || NOT_LISTED : "—"} b={b ? listedNames(b.player_perspectives) || NOT_LISTED : "—"} />
-          <Row label="Combat vs. Avoidance" a={a ? NOT_LISTED : "—"} b={b ? NOT_LISTED : "—"} />
-          <Row label="Game Structure" a={a ? NOT_LISTED : "—"} b={b ? NOT_LISTED : "—"} />
-          <Row label="Main Story Time" a={a ? NOT_LISTED : "—"} b={b ? NOT_LISTED : "—"} />
-          <Row label="Completionist Time" a={a ? NOT_LISTED : "—"} b={b ? NOT_LISTED : "—"} />
-          <Row label="Solo / Co-op Details" a={a ? getMultiplayerDetails(a) : "—"} b={b ? getMultiplayerDetails(b) : "—"} />
-          <Row label="Replayability" a={a ? NOT_LISTED : "—"} b={b ? NOT_LISTED : "—"} />
-
-          <SectionHeading>Best fit</SectionHeading>
-          <p className="mb-2 text-xs text-[color:var(--nf-text-dim)]">
-            Summaries use listed provider metadata only; they are not editorial recommendations.
-          </p>
-          <Row label="Experience Snapshot" a={a ? getBestFit(a) : "—"} b={b ? getBestFit(b) : "—"} />
+          {visibleSections.map((section) => (
+            <div key={section.title}>
+              <SectionHeading>{section.title}</SectionHeading>
+              {section.description && (
+                <p className="mb-2 text-xs text-[color:var(--nf-text-dim)]">{section.description}</p>
+              )}
+              {section.rows.map((row) => (
+                <Row
+                  key={row.label}
+                  label={row.label}
+                  a={row.a}
+                  b={row.b}
+                />
+              ))}
+            </div>
+          ))}
         </section>
       )}
     </div>

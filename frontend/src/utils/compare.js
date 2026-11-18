@@ -1,5 +1,11 @@
 export const NOT_LISTED = "Not listed by provider";
 
+export const isSameGame = (left, right) => {
+  if (!left || !right) return false;
+  if (left.slug && right.slug) return left.slug === right.slug;
+  return left.id != null && right.id != null && left.id === right.id;
+};
+
 const uniqueNames = (items) =>
   [...new Set((items || []).map((item) => item?.name || item).filter(Boolean))];
 
@@ -33,7 +39,7 @@ export const getMultiplayerDetails = (game) => {
     add(mode.split_screen_online, "Online split-screen");
   });
 
-  return uniqueNames(details).join(", ") || "No multiplayer modes listed";
+  return uniqueNames(details).join(", ") || NOT_LISTED;
 };
 
 export const getBestFit = (game) => {

@@ -12,6 +12,9 @@ screenshots, compare games, and uncover hidden gems.
 
 ## Recent Updates
 
+- Added RAWG ratings when available across game details, comparisons, and the homepage hero; the hero hides critics scores when a RAWG score is present to stay compact on mobile.
+- Enhanced game comparisons with sticky game labels, distinct suggestions for each slot, duplicate-selection prevention, and rows that appear only when provider data is available.
+- Expanded the Random Horror picker with a mixed horror pool, trending, top-rated, recent, upcoming, and Favorites pools, genre/platform filters, recent-pick avoidance, and metadata-based explanations.
 - Added a separate Express API with IGDB as the primary horror-game provider and RAWG as a server-side fallback.
 - Added a seven-game hero carousel with a smooth slide transition, five-second autoplay, and dot navigation. Dead by Daylight is second and The Dark Pictures Anthology: Man of Medan is third.
 - Expanded game details with horror themes and keywords, content-rating descriptors, supported languages, release dates by platform, DLC/expansions, franchise timelines, and separate player/critic rating counts. Accessibility details are identified as unavailable when providers do not supply them.
@@ -34,13 +37,13 @@ screenshots, compare games, and uncover hidden gems.
 
 - **Home** — rotating hero for featured horror games; curated Trending in the Dark and Top Rated Nightmares carousels, recent / upcoming games, genre & platform strips, featured collection bento grid
 - **Browse** — genre / platform / release-year / rating filters, sorting, "load more" pagination
-- **Game Details** — responsive hero with ratings and platforms, genres and themes, multiplayer modes, game engine, regional age ratings, language and release details, DLC/expansions, ports/remakes/remasters, franchise timelines, trailer and screenshots, related games, and official/store/community links
+- **Game Details** — responsive hero with IGDB and available RAWG ratings, platforms, genres and themes, multiplayer modes, game engine, regional age ratings, language and release details, DLC/expansions, ports/remakes/remasters, franchise timelines, trailer and screenshots, related games, and official/store/community links
 - **Live Search** — debounced IGDB queries with RAWG fallback, keyboard-driven modal (⌘/Ctrl+K), highlighted matches
 - **Favorites** — hearts on every card, persisted in `localStorage`
 - **Recently Viewed** — auto-tracked as you explore
 - **Collections** — user-made lists (create, rename, delete), stored locally
-- **Compare Games** — side-by-side ratings, release date, rating count, average playtime, ESRB rating, genres, platforms, Metacritic score, developers, and publishers
-- **Random Horror Generator** — "Dare to Play" roulette with cinematic build-up
+- **Compare Games** — side-by-side ratings (including RAWG when available), release date, rating count, average playtime, ESRB rating, genres, platforms, Metacritic score, developers, and publishers
+- **Random Horror Generator** — mix all horror pools or choose trending, top-rated, recent, upcoming, or Favorites; filter by genre/platform, avoid recent repeats, and see why a game was selected
 - **Theme Customization** — Fog / Blood / Eldritch theme toggle
 - **404, offline detection, and clear API-unavailable states**
 - **Accessibility** — semantic HTML, keyboard nav, ARIA labels, `prefers-reduced-motion`

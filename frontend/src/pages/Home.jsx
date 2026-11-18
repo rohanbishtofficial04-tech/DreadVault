@@ -27,6 +27,7 @@ const Hero = ({ games, error }) => {
     () => typeof document === "undefined" || document.visibilityState === "visible"
   );
   const game = games[activeIndex];
+  const hasRawgRating = Number.isFinite(game?.rawg_rating) && game.rawg_rating > 0;
 
   useEffect(() => {
     const handleVisibilityChange = () => {
@@ -92,8 +93,9 @@ const Hero = ({ games, error }) => {
             <div className="mt-6 flex flex-wrap items-center gap-3">
               <RatingBadge
                 value={game.rating}
-                metacritic={game.metacritic}
-                criticRating={game.critic_rating}
+                metacritic={hasRawgRating ? null : game.metacritic}
+                criticRating={hasRawgRating ? null : game.critic_rating}
+                rawgRating={game.rawg_rating}
                 provider={game.provider}
               />
               <PlatformBadges platforms={game.parent_platforms} max={6} />

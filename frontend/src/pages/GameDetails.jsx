@@ -324,9 +324,11 @@ export default function GameDetails() {
   const ratingDescriptors = [...new Set(
     (game.age_ratings || []).flatMap((rating) => rating.descriptors || [])
   )];
-  const ratingSynopses = [...new Set(
-    (game.age_ratings || []).map((rating) => rating.synopsis).filter(Boolean)
-  )];
+  const ratingSynopses = [...new Map(
+    (game.age_ratings || [])
+      .filter((rating) => rating.synopsis?.trim())
+      .map((rating) => [rating.synopsis, rating])
+  ).values()];
   const regionalRatings = (game.age_ratings || [])
     .filter((rating) => rating.organization && rating.rating)
     .map((rating) => ({
@@ -427,6 +429,7 @@ export default function GameDetails() {
                 value={game.rating}
                 metacritic={game.metacritic}
                 criticRating={game.critic_rating}
+                rawgRating={game.rawg_rating}
                 provider={game.provider}
               />
               <PlatformBadges platforms={game.parent_platforms} max={6} />
@@ -601,10 +604,25 @@ export default function GameDetails() {
               ))}
             </div>
           )}
-          {ratingSynopses.map((synopsis) => (
-            <p key={synopsis} className="mt-4 max-w-3xl text-sm text-[color:var(--nf-text-dim)]">
-              {synopsis}
-            </p>
+          {ratingSynopses.map(({ organization, rating, synopsis }) => (
+            <article
+              key={synopsis}
+              className="mt-5 max-w-4xl border border-[color:var(--nf-border)] bg-[color:var(--nf-surface)] p-5 sm:p-6"
+            >
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="font-display text-xl">
+                  {organization ? `${organization} content guidance` : "Content guidance"}
+                </p>
+                {rating && (
+                  <span className="nf-chip" aria-label={`${organization || "Age"} rating ${rating}`}>
+                    {rating}
+                  </span>
+                )}
+              </div>
+              <p className="mt-3 max-w-3xl whitespace-pre-line break-words text-sm leading-7 text-[color:var(--nf-text-dim)]">
+                {synopsis}
+              </p>
+            </article>
           ))}
         </section>
       )}

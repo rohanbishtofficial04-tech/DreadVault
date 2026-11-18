@@ -50,7 +50,6 @@ export const TID = {
   detailsTrailer: "details-trailer",
   detailsScreenshots: "details-screenshots",
   detailsRelated: "details-related",
-
   favoritesPage: "favorites-page",
   favoritesEmpty: "favorites-empty",
   collectionsPage: "collections-page",
@@ -62,6 +61,10 @@ export const TID = {
   randomPage: "random-page",
   randomRollBtn: "random-roll-btn",
   randomResult: "random-result",
+  randomPool: "random-pool",
+  randomGenre: "random-genre",
+  randomPlatform: "random-platform",
+  randomWhy: "random-why",
 
   aboutPage: "about-page",
   notFoundPage: "not-found-page",

@@ -1,6 +1,7 @@
 const igdb = require("./igdb");
 const rawg = require("./rawg");
 const { normalizeGame, dedupeGames } = require("./normalizeGame");
+const config = require("../config/env");
 
 const isEmptyList = (data) => !((data?.results || data || []).length);
 
@@ -65,6 +66,30 @@ const releaseYear = (game) => {
     return String(new Date(game.first_release_date * 1000).getUTCFullYear());
   }
   return "";
+};
+
+const withRawgRating = async (game) => {
+  if (game.provider !== "igdb" || !config.rawgApiKey || !game.name) return game;
+
+  try {
+    const data = await rawg.fetchSearch({
+      query: game.name,
+      page: 1,
+      page_size: 20,
+    });
+    const title = normalizeTitle(game.name);
+    const year = String(game.released || "").slice(0, 4);
+    const match = (data?.results || []).find((candidate) =>
+      normalizeTitle(candidate.name) === title &&
+      (!year || !candidate.released || String(candidate.released).startsWith(year))
+    );
+    if (Number.isFinite(match?.rating) && match.rating > 0) {
+      return { ...game, rawg_rating: match.rating };
+    }
+  } catch (error) {
+    console.warn(`Unable to load RAWG rating for ${game.name}.`, error.message);
+  }
+  return game;
 };
 
 const featuredOrder = [
@@ -136,7 +161,8 @@ const getFeaturedGames = async () => {
     };
     return indexOf(a) - indexOf(b);
   });
-  return { count: results.length, results };
+  const gamesWithRawgRatings = await Promise.all(results.map(withRawgRating));
+  return { count: gamesWithRawgRatings.length, results: gamesWithRawgRatings };
 };
 
 const getCuratedGames = async (order) => {
@@ -170,7 +196,8 @@ const getDetails = async (slug) => {
     (game) => !game
   );
   if (!data) return null;
-  const game = normalizeGame(data, provider);
+  let game = normalizeGame(data, provider);
+  game = await withRawgRating(game);
   return provider === "rawg" && !isHorrorGame(game) && !isFeaturedGame(game) ? null : game;
 };
 

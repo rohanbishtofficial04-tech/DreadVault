@@ -3,8 +3,10 @@ const assert = require("node:assert/strict");
 const igdb = require("../src/services/igdb");
 const rawg = require("../src/services/rawg");
 const gameService = require("../src/services/gameService");
+const config = require("../src/config/env");
 
 const original = {
+  rawgApiKey: config.rawgApiKey,
   igdbTrending: igdb.fetchTrending,
   rawgTrending: rawg.fetchTrending,
   igdbSearch: igdb.fetchSearch,
@@ -18,6 +20,7 @@ const original = {
 };
 
 test.afterEach(() => {
+  config.rawgApiKey = original.rawgApiKey;
   igdb.fetchTrending = original.igdbTrending;
   rawg.fetchTrending = original.rawgTrending;
   igdb.fetchSearch = original.igdbSearch;
@@ -49,6 +52,7 @@ test("uses IGDB as the primary provider and returns normalized list results", as
 });
 
 test("returns curated carousel games in the requested order", async () => {
+  config.rawgApiKey = "";
   igdb.fetchFeaturedGames = async () => [
     { id: 8, slug: "the-evil-within", name: "The Evil Within", first_release_date: 1413244800 },
     { id: 7, slug: "resident-evil-4--1", name: "Resident Evil 4", first_release_date: 1679616000 },
@@ -71,6 +75,23 @@ test("returns curated carousel games in the requested order", async () => {
   ]);
   assert.equal(result.results.some((game) => game.name === "Resident Evil 2"), false);
   assert.equal(result.results.some((game) => game.name === "Hellblade: Senua's Sacrifice"), false);
+});
+
+test("adds RAWG ratings to featured IGDB games when RAWG is configured", async () => {
+  config.rawgApiKey = "test-key";
+  igdb.fetchFeaturedGames = async () => [{
+    id: 5,
+    slug: "resident-evil-4--1",
+    name: "Resident Evil 4",
+    first_release_date: Date.UTC(2023, 2, 24) / 1000,
+    rating: 90,
+  }];
+  rawg.fetchSearch = async () => ({
+    results: [{ name: "Resident Evil 4", released: "2023-03-24", rating: 4.57 }],
+  });
+
+  const result = await gameService.getFeaturedGames();
+  assert.equal(result.results[0].rawg_rating, 4.57);
 });
 
 test("returns the top nightmares in curated order and selects the requested releases", async () => {
@@ -177,6 +198,48 @@ test("keeps RAWG detail fallback horror-filtered except for curated carousel tit
     genres: [{ slug: "adventure", name: "Adventure" }],
   });
   assert.equal((await gameService.getDetails("resident-evil-4--1")).id, 4);
+});
+
+test("adds a matching RAWG rating to IGDB game details when RAWG is configured", async () => {
+  config.rawgApiKey = "test-key";
+  igdb.fetchGameDetails = async () => ({
+    id: 5,
+    slug: "silent-hill-2",
+    name: "Silent Hill II",
+    first_release_date: Date.UTC(2024, 9, 8) / 1000,
+    rating: 90,
+  });
+  rawg.fetchSearch = async ({ query }) => {
+    assert.equal(query, "Silent Hill II");
+    return {
+      results: [
+        { name: "Silent Hill 2", released: "2001-09-24", rating: 4.8 },
+        { name: "Silent Hill 2", released: "2024-10-08", rating: 4.5 },
+      ],
+    };
+  };
+
+  const game = await gameService.getDetails("silent-hill-2");
+  assert.equal(game.rating, 4.5);
+  assert.equal(game.rawg_rating, 4.5);
+});
+
+test("keeps IGDB details when RAWG does not have a matching rating", async () => {
+  config.rawgApiKey = "test-key";
+  igdb.fetchGameDetails = async () => ({
+    id: 6,
+    slug: "unknown-horror",
+    name: "Unknown Horror",
+    first_release_date: Date.UTC(2020, 0, 1) / 1000,
+    rating: 80,
+  });
+  rawg.fetchSearch = async () => ({
+    results: [{ name: "Unrelated Horror", released: "2020-01-01", rating: 4.2 }],
+  });
+
+  const game = await gameService.getDetails("unknown-horror");
+  assert.equal(game.rating, 4);
+  assert.equal(game.rawg_rating, null);
 });
 
 test("falls back to RAWG when IGDB throws, and surfaces dual provider failures", async () => {

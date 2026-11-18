@@ -135,10 +135,11 @@ test("normalizes IGDB metadata into the existing game card shape", () => {
 });
 
 test("retains RAWG fields and supplies safe collection defaults", () => {
-  const rawg = { id: 3, name: "RAWG game", genres: [{ id: 1, name: "Horror" }] };
+  const rawg = { id: 3, name: "RAWG game", rating: 4.2, genres: [{ id: 1, name: "Horror" }] };
   assert.deepEqual(normalizeRawg(rawg), {
     ...rawg,
     provider: "rawg",
+    rawg_rating: 4.2,
     critic_rating: null,
     critic_rating_count: null,
     themes: [],

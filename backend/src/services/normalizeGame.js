@@ -132,6 +132,7 @@ const normalizeIgdb = (game) => {
     cover_image: cover,
     released: releaseDate(game.first_release_date),
     rating,
+    rawg_rating: null,
     rating_count: ratingCount,
     ratings_count: totalRatingCount,
     metacritic: null,
@@ -223,6 +224,7 @@ const normalizeIgdb = (game) => {
 const normalizeRawg = (game) => ({
   ...game,
   provider: "rawg",
+  rawg_rating: Number.isFinite(game.rating) ? game.rating : null,
   critic_rating: null,
   critic_rating_count: null,
   themes: game.themes || [],
